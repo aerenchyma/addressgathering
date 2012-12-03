@@ -8,3 +8,21 @@
 
 ########
 
+from make_csv import OnePartCSV
+from flask import Flask
+
+app = Flask(__name__)
+
+
+@app.route("/")
+def home():
+    newinst = OnePartCSV("third_test.csv")
+    newinst.make_csv()
+    s = open(newinst.csv, 'r').read()
+    return s
+    # internal server error (server overloaded or other problem) -- 
+    # also, interaction remains in console this way which is a problem too
+
+
+if __name__ == '__main__':
+    app.run()
