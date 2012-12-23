@@ -19,8 +19,8 @@ def submit_query(query_tag)
 end
 
 def get_results(mechanize_page)
-  if $useful_links.length >= 400
-  #if $useful_links.length >= 15 # test line
+  #if $useful_links.length >= 400
+  if $useful_links.length >= 10 # test line
     return $useful_links
   end
   
@@ -41,32 +41,24 @@ def get_results(mechanize_page)
 end
 
 
-def to_something(str)
-  duck = (Integer(str) rescue Float(str) rescue Time.parse(str) rescue nil)
-  duck.nil? ? str : duck
-end
-
-
-$db = SQLite3::Database.open "links_test.db"
+#$db = SQLite3::Database.open "links_test.db"
 a = submit_query("pow")
 tr = get_results(a)
 
-$db.execute "DROP TABLE IF EXISTS Links"
-$db.execute "CREATE TABLE IF NOT EXISTS Links(Link TEXT)"
-begin
-tr.each do |l|
+##$db.execute "DROP TABLE IF EXISTS Links" ## only for redoing/first time -- with data, don't want to drop table
+#$db.execute "CREATE TABLE IF NOT EXISTS Links(Link TEXT)"
+#begin
+#tr.each do |l|
+#  st = l.uri.to_s
 
-  #st = l.to_s[1]
-  st = l.uri.to_s
-
-  if st
-    $db.execute "INSERT INTO Links VALUES('" + st + "')" #Exception "unrecognized character '#'" every time...
-  end
-  puts "got past a db command"
-end
-  rescue SQLite3::Exception => e
-    puts "Exception, #{e}"
-end
+#  if st
+#    $db.execute "INSERT INTO Links VALUES('" + st + "')" #Exception "unrecognized character '#'" every time...
+#  end
+#  puts "got past a db command"
+#end
+#  rescue SQLite3::Exception => e
+#    puts "Exception, #{e}"
+#end
   
 #  puts "Exception occurred"
 #  puts e
@@ -81,6 +73,16 @@ end
 
 puts "END"#tr
 puts "length #{tr.length}"
+
+## TEST CRAWLING
+tr.each do |l|
+  pg_stuff = l.click
+  $1 = /\d{1,3}.?\d{0,3}\s[a-zA-Z]{2,30}\s[a-zA-Z]{2,15}/
+
+
+
+
+
 
 # get addresses from these links
 # take out the ones that aren't in MI
