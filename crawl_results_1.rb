@@ -67,8 +67,11 @@ crawl_pgs.each do |pg|
   page = Nokogiri::HTML(open(url))
   #p page
   a = page.css('span').text 
-  if a =~ /\b(\d{2,5}\s+)(?![a|p]m\b)(NW|NE|SW|SE|north|south|west|east|n|e|s|w)?([\s|\,|.]+)(([a-zA-Z|\s+]{1,30}){1,4})(court|ct|street|st|drive|dr|lane|ln|road|rd|blvd|boulevard|ave|avenue|place|plc)/i
-    p a.split("\n") # not the split, but this looks like good info! yay!
+  reg = /\b(\d{2,5}\s+)(?![a|p]m\b)(NW|NE|SW|SE|north|south|west|east|n|e|s|w)?([\s|\,|.]+)(([a-zA-Z|\s+]{1,30}){1,4})(court|ct|street|st|drive|dr|lane|ln|road|rd|blvd|boulevard|ave|avenue|place|plc)/i
+  if a =~ reg
+    ab = a.scan(reg)
+    #p a.split("\n") # not the split, but this looks like good info! yay!
+    p ab # this gets me lists that are indiv word-segments of what looks like all/enough of the relevant addresses, but no names and also the format is bad b/c the st addrs themselves are split up
   end
   
 end
