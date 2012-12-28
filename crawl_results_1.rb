@@ -11,6 +11,21 @@ $agent = Mechanize.new
 $useful_links = []
 
 
+def fixlist(inplist)
+  # remove spaces, remove nils, remove non-essential pieces
+  #remove duplicates that don't make sense
+  ## (maybe fix for unicode??)
+  # return list without previously stated problems
+  n = inplist.select {|x| x != " "}
+  n = n.select {|x| x != ""}
+  n.each do |f|
+    f.strip!
+  end
+  n = n.uniq
+  n
+end
+
+
 def submit_query(query_tag)
   baseurl = "https://www.google.com/search?q="
   if query_tag == "pow"
@@ -48,8 +63,12 @@ tr = get_results(a)
 
 
 crawl_pgs = []
+begin
 tr.each do |l|
   crawl_pgs << l.click
+end
+rescue  Exception => e
+  puts "Exception happened, called #{e}"
   # crawl page stuff for the combinations of address information and store each, or print each
 end
 
@@ -71,7 +90,13 @@ crawl_pgs.each do |pg|
   if a =~ reg
     ab = a.scan(reg)
     #p a.split("\n") # not the split, but this looks like good info! yay!
-    p ab # this gets me lists that are indiv word-segments of what looks like all/enough of the relevant addresses, but no names and also the format is bad b/c the st addrs themselves are split up
+    #p ab # this gets me lists that are indiv word-segments of what looks like all/enough of the relevant addresses, but no names and also the format is bad b/c the st addrs themselves are split up
+    ab.each do |ls|
+      #lst = fixlist(ls)
+      lst = fixlist(ls)
+      quest = lst.map { |w| CGI.escape(w) }.join(" ")
+      p quest # closer, need to take out extra spaces in the lists first and find out why error (see console)
+    end
   end
   
 end
