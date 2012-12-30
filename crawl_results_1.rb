@@ -18,6 +18,7 @@ def fixlist(inplist)
   # return list without previously stated problems
   n = inplist.select {|x| x != " "}
   n = n.select {|x| x != ""}
+  n = n.select {|x| x != nil}
   n.each do |f|
     f.strip!
   end
@@ -36,8 +37,8 @@ def submit_query(query_tag)
 end
 
 def get_results(mechanize_page)
-  #if $useful_links.length >= 400
-  if $useful_links.length >= 10 # test line
+  if $useful_links.length >= 400
+  #if $useful_links.length >= 10 # test line
     return $useful_links
   end
   
