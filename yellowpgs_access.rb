@@ -3,15 +3,15 @@ require 'mechanize'
 require 'nokogiri'
 require 'open-uri'
 
-agent = Mechanize.new
-page = agent.get('http://yellowpages.com')
+$agent = Mechanize.new
+page = $agent.get('http://yellowpages.com')
 forms = page.forms
 searchform = forms.first
 #searchform.search_terms = gets.chomp!
 searchform.search_terms = "places of worship"
 #searchform.geo_location_terms = gets.chomp!
 searchform.geo_location_terms = "Detroit, MI"
-results = agent.submit(searchform)
+results = $agent.submit(searchform)
 start_pg = results.uri # this is the page to start scraping from
 
 ## name, after <h3 class="business-name fn org" + bunch of other stuff before end tag
@@ -58,7 +58,7 @@ places_info = []
 
 #place_names.each {|x| puts x.text.strip!}
 
-
+$baseurl = "http://yellowpages.com"
 $doc_hashes = []
 #while pg.css("li.next")
   
@@ -75,6 +75,18 @@ def create_hashes(page)
     # sometimes get nil when info exists. why? -- NB. don't use .strip! if not needed
     count += 1
     $doc_hashes << a
+    pp a
+  end
+  #p $doc_hashes
+  if page.css("li.next")
+    puts "GOT INTO THE NEXT BLOCK"
+    n_url = page.css("li.next").first ## this is: <li class="next"><a href="/detroit-mi/places-of-worship?g=Detroit%2C+MI&amp;page=2&amp;q=places+of+worship">Next</a></li>
+    ## how to access the part inside the href??
+    puts "THIS IS THE URL PART, #{n_url}"
+    
+    n_pg = Nokogiri::HTML(open($baseurl + n_url))
+    create_hashes(n_pg)
+ 
   end
   #p $doc_hashes
 end
