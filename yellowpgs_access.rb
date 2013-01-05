@@ -8,7 +8,7 @@ page = $agent.get('http://yellowpages.com')
 forms = page.forms
 searchform = forms.first
 #searchform.search_terms = gets.chomp!
-searchform.search_terms = "places of worship"
+searchform.search_terms = "Veternary Services"
 #searchform.geo_location_terms = gets.chomp!
 searchform.geo_location_terms = "Detroit, MI"
 results = $agent.submit(searchform)
@@ -64,37 +64,48 @@ $doc_hashes = []
   
   
 def create_hashes(page)
+  $place_names = page.css("h3").select{|xc| xc["class"] == "business-name fn org"}
+  $addresses = page.css("span.street-address")
+  $citynames = page.css("span.locality")
+  $statenames = page.css("span.region")
+  $zipcodes = page.css("span.postal-code")
   count = 0
   while count < 30 do #30 results per page default on yellowpages.com
     a = Hash.new
+    begin
     a['name'] = $place_names[count].text.strip! 
-    a['addr'] = $addresses[count].text.strip!
+    a['addr'] = $addresses[count].text.strip! # this is where it goes nil when there's nothing
     a['city'] = $citynames[count].text
     a['state'] = $statenames[count].text
     a['zip'] = $zipcodes[count].text
-    # sometimes get nil when info exists. why? -- NB. don't use .strip! if not needed
+    # NB. don't use .strip! if not needed, or will break -> nil where there actually is info
+  rescue Exception => e
+    break
+  else
     count += 1
     $doc_hashes << a
     pp a
   end
+  end
   #p $doc_hashes
   if page.css("li.next")
-    newest_url = page.css("li").select{|yz| yz["class"] == "next"}
-    pp newest_url
-    new_url = newest_url[1].a["a"]
-    n_url = new_url
-    puts "THIS IS THE URL PART, #{n_url}"
-    
-    n_pg = Nokogiri::HTML(open($baseurl + n_url))
-    create_hashes(n_pg)
- 
+    sel = page.css("li.next a").map {|link| link['href']}
+    #pp sel
+    n_url = sel[0]
+    if n_url
+      n_pg = Nokogiri::HTML(open($baseurl + n_url))
+      create_hashes(n_pg)
+    end
   end
   #p $doc_hashes
 end
 
 create_hashes(pg)
 
+# YAY
 
+## create CSVs -- how to handle?
+## in CSVs -- want to remove duplicate addresses (yes?)
 
 
 #test_stuff.each do |yz|
