@@ -79,9 +79,10 @@ def create_hashes(page)
   end
   #p $doc_hashes
   if page.css("li.next")
-    puts "GOT INTO THE NEXT BLOCK"
-    n_url = page.css("li.next").first ## this is: <li class="next"><a href="/detroit-mi/places-of-worship?g=Detroit%2C+MI&amp;page=2&amp;q=places+of+worship">Next</a></li>
-    ## how to access the part inside the href??
+    newest_url = page.css("li").select{|yz| yz["class"] == "next"}
+    pp newest_url
+    new_url = newest_url[1].a["a"]
+    n_url = new_url
     puts "THIS IS THE URL PART, #{n_url}"
     
     n_pg = Nokogiri::HTML(open($baseurl + n_url))
