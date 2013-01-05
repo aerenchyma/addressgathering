@@ -42,11 +42,11 @@ pg = Nokogiri::HTML(open(start_pg))
 #citynames = pg.css("span").select{|nm| nm["class"] == "locality"}
 #citynames.each{|nm| puts nm.text}
 
-place_names = pg.css("h3").select{|xc| xc["class"] == "business-name fn org"}
-addresses = pg.css("span.street-address")
-citynames = pg.css("span.locality")
-statenames = pg.css("span.region")
-zipcodes = pg.css("span.postal-code")
+$place_names = pg.css("h3").select{|xc| xc["class"] == "business-name fn org"}
+$addresses = pg.css("span.street-address")
+$citynames = pg.css("span.locality")
+$statenames = pg.css("span.region")
+$zipcodes = pg.css("span.postal-code")
 #citynames.each {|nm| puts nm.text}
 
 # so this works. want to collect all the information into an array doc each time
@@ -59,21 +59,28 @@ places_info = []
 #place_names.each {|x| puts x.text.strip!}
 
 
-doc_hashes = []
-
-count = 0
-while count < 30 do #30 results per page default on yellowpages.com
-  a = Hash.new
-  a['name'] = place_names[count].text.strip! 
-  a['addr'] = addresses[count].text.strip!
-  a['city'] = citynames[count].text
-  a['state'] = statenames[count].text
-  a['zip'] = zipcodes[count].text
-  # sometimes get nil when info exists. why? -- NB. don't use .strip! if not needed
-  count += 1
-  doc_hashes << a
+$doc_hashes = []
+#while pg.css("li.next")
+  
+  
+def create_hashes(page)
+  count = 0
+  while count < 30 do #30 results per page default on yellowpages.com
+    a = Hash.new
+    a['name'] = $place_names[count].text.strip! 
+    a['addr'] = $addresses[count].text.strip!
+    a['city'] = $citynames[count].text
+    a['state'] = $statenames[count].text
+    a['zip'] = $zipcodes[count].text
+    # sometimes get nil when info exists. why? -- NB. don't use .strip! if not needed
+    count += 1
+    $doc_hashes << a
+  end
+  #p $doc_hashes
 end
-#p doc_hashes
+
+create_hashes(pg)
+
 
 
 
