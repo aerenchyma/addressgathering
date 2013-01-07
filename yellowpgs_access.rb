@@ -48,7 +48,6 @@ def create_hashes(page)
   else
     count += 1
     $doc_hashes << a
-    #pp a
   end
   end
   #pp $doc_hashes
@@ -86,11 +85,15 @@ end
 f.close
 
 
-## in CSVs -- want to remove duplicate addresses (yes?)
-## want easy option to add to csv at least with command
-## other problem: functional without access to command line??
+#### TODOS
+## in CSVs -- filters
+## easy option to add to csv with command? -- this is an issue for Sinatra app
+## other problem: functional without access to command line? --> Sinatra
+## could be faster -- profile and improve
 
 ## FILTERS:
-## no duplicates
-## nothing (??) if state is not MI
-## other filters that could be done programtically/by Excel macro?
+## no duplicates (remove duplicate addresses, but not other duplicates)
+## nothing (?) if state is not MI
+## other filters desired that could be done programtically/by Excel macro?
+## ways of making human check easier? (bolding unusual entries? def'n of unusual?)
+
