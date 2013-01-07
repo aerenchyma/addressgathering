@@ -34,11 +34,11 @@ def create_hashes(page)
   $statenames = page.css("span.region")
   $zipcodes = page.css("span.postal-code")
   count = 0
-  while count < 30 do #30 results per page default on yellowpages.com
+  while count < 30 do # 30 results per page default on yellowpages.com
     a = Hash.new
     begin
     a['name'] = $place_names[count].text.strip! 
-    a['addr'] = $addresses[count].text.strip!.gsub!(",","") # this is where it goes nil when there's nothing
+    a['addr'] = $addresses[count].text.strip!.gsub!(",","") 
     a['city'] = $citynames[count].text
     a['state'] = $statenames[count].text
     a['zip'] = $zipcodes[count].text
@@ -64,22 +64,12 @@ def create_hashes(page)
 end
 
 def transform_hash(hn) # addrs is a list of hashes
-  #if !$addrs.has_key?(hn['addr']) 
-  #  s = "#{hn['name']}, #{hn['addr']}, #{hn['city']}, #{hn['state']}, #{hn['zip']}\n"
-  #  return s
-  #else
-  #  return false
-  #end
   s = "#{hn['name']}, #{hn['addr']}, #{hn['city']}, #{hn['state']}, #{hn['zip']}\n"
   s
 end
 
 $fname = "test_pow_3.csv"
 csv_header = %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join(", ") + "\n"
-## problem -- this should only happen the FIRST time the csv is open, otherwise it will appear in the middle
-
-#$addrs = Hash.new
-
 
 hashed_infos = create_hashes(pg)
 
@@ -88,19 +78,8 @@ if f.readline != %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join("
   f.write(csv_header)
 end
 
-#hashed_infos.each do |th|
-#  if !$addrs.has_key?(th['addr'])
-#    $addrs[th['addr']] = 1
-#  else
-#    $addrs[th['addr']] += 1
-#  end
-#end
 
 hashed_infos.each do |h|
-  #t = transform_hash(h, $addrs)
-  #if t
-  #  f.write(t)
-  #end
   f.write(transform_hash(h))
 end
 
