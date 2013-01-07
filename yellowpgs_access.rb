@@ -9,7 +9,7 @@ page = $agent.get('http://yellowpages.com')
 forms = page.forms
 searchform = forms.first
 #searchform.search_terms = gets.chomp!
-searchform.search_terms = "Veternary Services"
+searchform.search_terms = "muslim"
 #searchform.geo_location_terms = gets.chomp!
 searchform.geo_location_terms = "Detroit, MI"
 results = $agent.submit(searchform)
@@ -63,27 +63,55 @@ def create_hashes(page)
   $doc_hashes
 end
 
-def transform_hash(hn)
+def transform_hash(hn) # addrs is a list of hashes
+  #if !$addrs.has_key?(hn['addr']) 
+  #  s = "#{hn['name']}, #{hn['addr']}, #{hn['city']}, #{hn['state']}, #{hn['zip']}\n"
+  #  return s
+  #else
+  #  return false
+  #end
   s = "#{hn['name']}, #{hn['addr']}, #{hn['city']}, #{hn['state']}, #{hn['zip']}\n"
   s
 end
 
-$fname = "test_1.csv"
+$fname = "test_pow_3.csv"
 csv_header = %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join(", ") + "\n"
+## problem -- this should only happen the FIRST time the csv is open, otherwise it will appear in the middle
+
+#$addrs = Hash.new
+
 
 hashed_infos = create_hashes(pg)
 
-f = File.open($fname, 'w') 
-f.write(csv_header)
+f = File.open($fname, 'a+') 
+if f.readline != %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join(", ") + "\n"
+  f.write(csv_header)
+end
+
+#hashed_infos.each do |th|
+#  if !$addrs.has_key?(th['addr'])
+#    $addrs[th['addr']] = 1
+#  else
+#    $addrs[th['addr']] += 1
+#  end
+#end
 
 hashed_infos.each do |h|
+  #t = transform_hash(h, $addrs)
+  #if t
+  #  f.write(t)
+  #end
   f.write(transform_hash(h))
 end
 
 f.close
 
-# YAY
 
-## create CSVs -- how to handle?
 ## in CSVs -- want to remove duplicate addresses (yes?)
+## want easy option to add to csv at least with command
+## other problem: functional without access to command line??
 
+## FILTERS:
+## no duplicates
+## nothing (??) if state is not MI
+## other filters that could be done programtically/by Excel macro?
