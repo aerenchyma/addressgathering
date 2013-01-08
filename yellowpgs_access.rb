@@ -16,14 +16,6 @@ results = $agent.submit(searchform)
 start_pg = results.uri # this is the page to start scraping from
 pg = Nokogiri::HTML(open(start_pg)) # Nokogiri document of the start page
 
-
-$place_names = pg.css("h3").select{|xc| xc["class"] == "business-name fn org"}
-$addresses = pg.css("span.street-address")
-$citynames = pg.css("span.locality")
-$statenames = pg.css("span.region")
-$zipcodes = pg.css("span.postal-code")
-
-
 $baseurl = "http://yellowpages.com"
 $doc_hashes = []
   
