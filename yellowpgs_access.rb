@@ -5,13 +5,15 @@ require 'open-uri'
 require 'cgi'
 
 $agent = Mechanize.new
+query = "places of worship"
+location = "Detroit, MI"
 page = $agent.get('http://yellowpages.com')
 forms = page.forms
 searchform = forms.first
 #searchform.search_terms = gets.chomp!
-searchform.search_terms = "muslim"
+searchform.search_terms = query
 #searchform.geo_location_terms = gets.chomp!
-searchform.geo_location_terms = "Detroit, MI"
+searchform.geo_location_terms = location
 results = $agent.submit(searchform)
 start_pg = results.uri # this is the page to start scraping from
 pg = Nokogiri::HTML(open(start_pg)) # Nokogiri document of the start page
