@@ -1,14 +1,14 @@
 
 
-post "/" do
-	query = params["query"]
-
-	haml :index
+get "/" do
+	
+	haml :search
 end
 
 
-get "/search" do
+post "/search" do
 	query = params["query"]
-	haml :search
-
+	location = params["location"]
+	params["apb"] = query.length + location.length
+	haml :index
 end
