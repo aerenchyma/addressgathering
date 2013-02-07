@@ -1,0 +1,9 @@
+# Gemfile
+source :rubygems
+
+gem "sinatra"
+gem "haml"
+gem "mechanize"
+gem "nokogiri"
+#gem "open-uri"
+#gem "cgi"

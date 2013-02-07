@@ -1,0 +1,13 @@
+%form{:action => "/", :method => "post"}
+	%legend
+		Enter search information
+	%p
+		%label{:for => "query"}
+		%input{:type => "text", :name => "query", :id => "query"}
+	%p
+		%label{:for => "location"}
+		%input{:type => "text", :name => "location", :id => "location"}
+	%p
+		%input{:type => "submit", :value => "Send", :class => "button"}
+
+
