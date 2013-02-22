@@ -5,13 +5,14 @@ require 'open-uri'
 require 'cgi'
 
 $agent = Mechanize.new
-query = "places of worship"
-location = "Detroit, MI"
+query = "mosques" # PICK QUERY HERE
+location = "Lansing, MI" # PICK LOCATION SEARCH HERE
+# easier in-app, naturally
 page = $agent.get('http://yellowpages.com')
 forms = page.forms
 searchform = forms.first
 #searchform.search_terms = gets.chomp!
-searchform.search_terms = query
+searchform.search_terms = query 
 #searchform.geo_location_terms = gets.chomp!
 searchform.geo_location_terms = location
 results = $agent.submit(searchform)
@@ -61,13 +62,18 @@ def transform_hash(hn) # addrs is a list of hashes
   s
 end
 
-$fname = "test_pow_3.csv"
+$fname = "20130222_test2_pow.csv" # PICK FILE NAME HERE
 csv_header = %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join(", ") + "\n"
 
 hashed_infos = create_hashes(pg)
 
-f = File.open($fname, 'a+') 
-if f.readline != %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join(", ") + "\n"
+begin
+  f = File.open($fname, 'a+') 
+  f.readline
+rescue
+  f.close
+  f = File.open($fname, 'w+')
+#if f.readline != %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join(", ") + "\n"
   f.write(csv_header)
 end
 
@@ -86,7 +92,7 @@ f.close
 ## could be faster -- profile and improve
 
 ## FILTERS:
-## no duplicates (remove duplicate addresses, but not other duplicates)
+## no duplicates (remove duplicate addresses, but not other duplicates) -- important fix
 ## nothing (?) if state is not MI
 ## other filters desired that could be done programtically/by Excel macro?
 ## ways of making human check easier? (bolding unusual entries? def'n of unusual?)
