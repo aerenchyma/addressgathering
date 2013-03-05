@@ -4,9 +4,13 @@ require 'nokogiri'
 require 'open-uri'
 require 'cgi'
 
+
+
 $agent = Mechanize.new
-query = "mosques" # PICK QUERY HERE
-location = "Lansing, MI" # PICK LOCATION SEARCH HERE
+query = "community" # PICK QUERY HERE
+location = "woodward ave, detroit, MI" # PICK LOCATION SEARCH HERE
+#query = gets.chomp!
+#location = gets.chomp!
 # easier in-app, naturally
 page = $agent.get('http://yellowpages.com')
 forms = page.forms
@@ -28,6 +32,7 @@ def create_hashes(page)
   $citynames = page.css("span.locality")
   $statenames = page.css("span.region")
   $zipcodes = page.css("span.postal-code")
+  $phonenums = page.css("span.business-phone phone") # addition!
   count = 0
   while count < 30 do # 30 results per page default on yellowpages.com
     a = Hash.new
@@ -37,6 +42,7 @@ def create_hashes(page)
     a['city'] = $citynames[count].text
     a['state'] = $statenames[count].text
     a['zip'] = $zipcodes[count].text
+    a['phone'] = $phonenums[count].text # addition!
     # NB. don't use .strip! if not needed, or will break -> nil where there actually is info
   rescue Exception => e
     break
@@ -58,12 +64,12 @@ def create_hashes(page)
 end
 
 def transform_hash(hn) # addrs is a list of hashes
-  s = "#{hn['name']}, #{hn['addr']}, #{hn['city']}, #{hn['state']}, #{hn['zip']}\n"
+  s = "#{hn['name']}, #{hn['addr']}, #{hn['city']}, #{hn['state']}, #{hn['zip']}, #{hn['phone']}\n"
   s
 end
 
-$fname = "20130222_test2_pow.csv" # PICK FILE NAME HERE
-csv_header = %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join(", ") + "\n"
+$fname = "20130304_tricounty_1.csv" # PICK FILE NAME HERE
+csv_header = %w{Name Address City State Zip Phone}.map {|w| CGI.escape(w) }.join(", ") + "\n"
 
 hashed_infos = create_hashes(pg)
 
