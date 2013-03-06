@@ -98,16 +98,15 @@ def today_string()
   yyyymmdd = "#{yr}#{mon}#{day}"
 end
 
-
-
-
+# filename happens below
+# replace commented-out line with something else for TEMP_NAME if you want to call your query something else
+#$fname = "TEMP_NAME"
 $fname = today_string() + "-" + location.gsub!(",","").split(' ').map {|w| CGI.escape(w)}.join("") + query.split(' ').map {|w| CGI.escape(w)}.join("")
-#  "20130306_tricounty-POW" # PICK FILE NAME HERE
 csv_header = %w{Name Address City State Zip Phone}.map {|w| CGI.escape(w) }.join(", ") + "\n"
 
 hashed_infos = create_hashes(pg)
 
-# due to following, may not overwrite file if it's readable -- will just add. Careful!
+# due to following, may not overwrite file if it's readable -- will just add to it. Careful!
 begin
   f = File.open($fname+".csv", 'a+') 
   f.readline
