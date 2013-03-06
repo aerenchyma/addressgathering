@@ -3,6 +3,7 @@ require 'mechanize'
 require 'nokogiri'
 require 'open-uri'
 require 'cgi'
+require 'set'
 
 
 
@@ -23,6 +24,21 @@ pg = Nokogiri::HTML(open(start_pg)) # Nokogiri document of the start page
 
 $baseurl = "http://yellowpages.com"
 $doc_hashes = []
+$addrs_check = []
+
+def dedupe_addrs(hash_list) # clearly isn't working how I intend it to
+  unique_hashes = []
+  check_addrs = Hash.new
+  hash_list.each do |h|
+    if !check_addrs.has_key?(h['addr'])
+      unique_hashes << h
+      check_addrs[h['addr']] = 1
+    end
+  end
+  unique_hashes
+end
+
+
   
 def create_hashes(page)
   $place_names = page.css("h3").select{|xc| xc["class"] == "business-name fn org"}
@@ -36,7 +52,7 @@ def create_hashes(page)
     a = Hash.new
     begin
     a['name'] = $place_names[count].text.strip! 
-    a['addr'] = $addresses[count].text.strip!.gsub!(",","") 
+    a['addr'] = $addresses[count].text.strip!.gsub!(",","")
     a['city'] = $citynames[count].text
     a['state'] = $statenames[count].text
     a['zip'] = $zipcodes[count].text
@@ -46,6 +62,7 @@ def create_hashes(page)
     break
   else
     count += 1
+
     $doc_hashes << a
   end
   end
@@ -58,7 +75,8 @@ def create_hashes(page)
       create_hashes(n_pg)
     end
   end
-  $doc_hashes
+  dedupe_addrs($doc_hashes)
+  #p ded_a
 end
 
 def transform_hash(hn) # addrs is a list of hashes
@@ -66,11 +84,30 @@ def transform_hash(hn) # addrs is a list of hashes
   s
 end
 
-$fname = "20130305_tricounty2_POW-try" # PICK FILE NAME HERE
+def today_string()
+  t = Time.new
+  yr = t.year
+  mon = t.month
+  day = t.day
+  if t.month < 10
+    mon = "0#{t.month}"
+  end
+  if t.day < 10
+    day = "0#{t.day}"
+  end
+  yyyymmdd = "#{yr}#{mon}#{day}"
+end
+
+
+
+
+$fname = today_string() + "-" + location.gsub!(",","").split(' ').map {|w| CGI.escape(w)}.join("") + query.split(' ').map {|w| CGI.escape(w)}.join("")
+#  "20130306_tricounty-POW" # PICK FILE NAME HERE
 csv_header = %w{Name Address City State Zip Phone}.map {|w| CGI.escape(w) }.join(", ") + "\n"
 
 hashed_infos = create_hashes(pg)
 
+# due to following, may not overwrite file if it's readable -- will just add. Careful!
 begin
   f = File.open($fname+".csv", 'a+') 
   f.readline
@@ -85,14 +122,14 @@ if hashed_infos.length < 1000
     f.write(transform_hash(h))
   end
 else
-  add_num = 2
+  file_num = 2
   hashed_infos[0..990].each do |h|
     f.write(transform_hash(h))
   end
   while hashed_infos.drop(991) != []
-      hashed_infos = hashed_infos.drop(990)
-      fnt = File.open($fname+"_#{add_num}.csv", 'a+')
-      add_num += 1
+      hashed_infos = hashed_infos.drop(991)
+      fnt = File.open($fname+"_#{file_num}.csv", 'a+')
+      file_num += 1
       fnt.write(csv_header)
       hashed_infos[0..990].each do |h|
         fnt.write(transform_hash(h))
@@ -107,10 +144,11 @@ if fnt
 end
 
 
+
 #### TODOS
 ## profile and improve
 ## better filters and information entry
-## automatic deduping
+## automatic deduping -- and deduping across files (non-memory storage/other caching necessary)
 ## appification
 
 
