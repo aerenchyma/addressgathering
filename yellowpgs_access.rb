@@ -9,9 +9,7 @@ require 'cgi'
 $agent = Mechanize.new
 query = "places of worship" # PICK QUERY HERE
 location = "Wayne County, MI" # PICK LOCATION SEARCH HERE
-#query = gets.chomp!
-#location = gets.chomp!
-# easier in-app, naturally
+
 page = $agent.get('http://yellowpages.com')
 forms = page.forms
 searchform = forms.first
@@ -42,7 +40,7 @@ def create_hashes(page)
     a['city'] = $citynames[count].text
     a['state'] = $statenames[count].text
     a['zip'] = $zipcodes[count].text
-    a['phone'] = $phonenums[count].text.strip! # addition!
+    a['phone'] = $phonenums[count].text.strip! 
     # NB. don't use .strip! if not needed, or will break -> nil where there actually is info
   rescue Exception => e
     break
@@ -79,7 +77,6 @@ begin
 rescue
   f.close
   f = File.open($fname+".csv", 'w+')
-#if f.readline != %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join(", ") + "\n"
   f.write(csv_header)
 end
 
@@ -111,16 +108,9 @@ end
 
 
 #### TODOS
-## in CSVs -- filters
-## easy option to add to csv with command? -- this is an issue for Sinatra app
-## other problem: functional without access to command line? --> Sinatra
-## could be faster -- profile and improve
+## profile and improve
+## better filters and information entry
+## automatic deduping
+## appification
 
-## make filters easy -- e.g. ""
-
-## FILTERS:
-## no duplicates (remove duplicate addresses, but not other duplicates) -- important fix
-## nothing (?) if state is not MI
-## other filters desired that could be done programtically/by Excel macro?
-## ways of making human check easier? (bolding unusual entries? def'n of unusual?)
 
