@@ -7,8 +7,8 @@ require 'cgi'
 
 
 $agent = Mechanize.new
-query = "community" # PICK QUERY HERE
-location = "woodward ave, detroit, MI" # PICK LOCATION SEARCH HERE
+query = "places of worship" # PICK QUERY HERE
+location = "Wayne County, MI" # PICK LOCATION SEARCH HERE
 #query = gets.chomp!
 #location = gets.chomp!
 # easier in-app, naturally
@@ -32,7 +32,7 @@ def create_hashes(page)
   $citynames = page.css("span.locality")
   $statenames = page.css("span.region")
   $zipcodes = page.css("span.postal-code")
-  $phonenums = page.css("span.business-phone phone") # addition!
+  $phonenums = page.css("span.phone") # addition!
   count = 0
   while count < 30 do # 30 results per page default on yellowpages.com
     a = Hash.new
@@ -42,7 +42,7 @@ def create_hashes(page)
     a['city'] = $citynames[count].text
     a['state'] = $statenames[count].text
     a['zip'] = $zipcodes[count].text
-    a['phone'] = $phonenums[count].text # addition!
+    a['phone'] = $phonenums[count].text.strip! # addition!
     # NB. don't use .strip! if not needed, or will break -> nil where there actually is info
   rescue Exception => e
     break
@@ -68,27 +68,46 @@ def transform_hash(hn) # addrs is a list of hashes
   s
 end
 
-$fname = "20130304_tricounty_1.csv" # PICK FILE NAME HERE
+$fname = "20130305_tricounty2_POW-try" # PICK FILE NAME HERE
 csv_header = %w{Name Address City State Zip Phone}.map {|w| CGI.escape(w) }.join(", ") + "\n"
 
 hashed_infos = create_hashes(pg)
 
 begin
-  f = File.open($fname, 'a+') 
+  f = File.open($fname+".csv", 'a+') 
   f.readline
 rescue
   f.close
-  f = File.open($fname, 'w+')
+  f = File.open($fname+".csv", 'w+')
 #if f.readline != %w{Name Address City State Zip}.map {|w| CGI.escape(w) }.join(", ") + "\n"
   f.write(csv_header)
 end
 
+if hashed_infos.length < 1000
+  hashed_infos.each do |h|
+    f.write(transform_hash(h))
+  end
+else
+  add_num = 2
+  hashed_infos[0..990].each do |h|
+    f.write(transform_hash(h))
+  end
+  while hashed_infos.drop(991) != []
+      hashed_infos = hashed_infos.drop(990)
+      fnt = File.open($fname+"_#{add_num}.csv", 'a+')
+      add_num += 1
+      fnt.write(csv_header)
+      hashed_infos[0..990].each do |h|
+        fnt.write(transform_hash(h))
+      end
+  end
 
-hashed_infos.each do |h|
-  f.write(transform_hash(h))
 end
 
 f.close
+if fnt
+  fnt.close
+end
 
 
 #### TODOS
@@ -96,6 +115,8 @@ f.close
 ## easy option to add to csv with command? -- this is an issue for Sinatra app
 ## other problem: functional without access to command line? --> Sinatra
 ## could be faster -- profile and improve
+
+## make filters easy -- e.g. ""
 
 ## FILTERS:
 ## no duplicates (remove duplicate addresses, but not other duplicates) -- important fix
