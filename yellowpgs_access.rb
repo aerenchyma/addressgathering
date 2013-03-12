@@ -3,20 +3,17 @@ require 'mechanize'
 require 'nokogiri'
 require 'open-uri'
 require 'cgi'
-require 'set'
 
 
 
 $agent = Mechanize.new
-query = "places of worship" # PICK QUERY HERE
+query = "community center" # PICK QUERY HERE
 location = "Wayne County, MI" # PICK LOCATION SEARCH HERE
 
 page = $agent.get('http://yellowpages.com')
 forms = page.forms
 searchform = forms.first
-#searchform.search_terms = gets.chomp!
 searchform.search_terms = query 
-#searchform.geo_location_terms = gets.chomp!
 searchform.geo_location_terms = location
 results = $agent.submit(searchform)
 start_pg = results.uri # this is the page to start scraping from
@@ -26,7 +23,7 @@ $baseurl = "http://yellowpages.com"
 $doc_hashes = []
 $addrs_check = []
 
-def dedupe_addrs(hash_list) # clearly isn't working how I intend it to
+def dedupe_addrs(hash_list)
   unique_hashes = []
   check_addrs = Hash.new
   hash_list.each do |h|
@@ -126,7 +123,7 @@ else
     f.write(transform_hash(h))
   end
   while hashed_infos.drop(991) != []
-      hashed_infos = hashed_infos.drop(991)
+      hashed_infos = hashed_infos.drop(991) # redundant bad
       fnt = File.open($fname+"_#{file_num}.csv", 'a+')
       file_num += 1
       fnt.write(csv_header)
@@ -146,8 +143,10 @@ end
 
 #### TODOS
 ## profile and improve
-## better filters and information entry
-## automatic deduping -- and deduping across files (non-memory storage/other caching necessary)
+## better and easier filters & information entry
+## deduping across files (non-memory storage/other caching necessary)
+## (another script? -- to take a set of .csv files, create one csv file with only unique entries
+##       and then separate THAT out into individual <1000-len files) -- bash script? considering.
 ## appification
 
 
